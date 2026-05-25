@@ -8,7 +8,30 @@ A ChatGPT-style web UI for generating **images** and **videos** using free-tier 
 
 > Note: xAI does not currently expose a public video-generation API, so video mode is Gemini-only.
 
-## Quick start
+---
+
+## One-Click Deploy (Recommended)
+
+Click below and it will ask for your API keys — that's it, you'll get a live URL:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSharifulHasanRoky%2FApps%2Ftree%2Fmain%2Fai-studio&env=GEMINI_API_KEY,GROK_API_KEY&envDescription=Get%20free%20API%20keys%20from%20Google%20AI%20Studio%20and%20xAI&envLink=https%3A%2F%2Faistudio.google.com%2Fapikey&project-name=ai-studio&repository-name=ai-studio&root-directory=ai-studio)
+
+### What you need before clicking:
+
+| Key | Where to get (FREE) | Link |
+|-----|---------------------|------|
+| **GEMINI_API_KEY** | Google AI Studio | https://aistudio.google.com/apikey |
+| **GROK_API_KEY** | xAI Console | https://console.x.ai |
+
+1. Get your free keys from the links above
+2. Click the "Deploy with Vercel" button
+3. Sign in with GitHub
+4. Paste your API keys when prompted
+5. Done! You'll get a live URL like `https://ai-studio-xyz.vercel.app`
+
+---
+
+## Local Development (Optional)
 
 ```bash
 cd ai-studio
@@ -20,11 +43,21 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Get free API keys
+---
 
-- **Gemini:** [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — free tier covers
-  image generation; Veo video has limited free quota.
-- **Grok:** [console.x.ai](https://console.x.ai) — sign up for free credits.
+## How to Use
+
+1. Open your deployed URL
+2. Select **Image** or **Video** mode at the bottom
+3. Choose **Gemini** or **Grok** as the AI provider (Video only works with Gemini)
+4. Type a prompt like:
+   - "A cute cat wearing sunglasses on a beach"
+   - "Cyberpunk Tokyo street at night, neon reflections"
+   - "Cinematic 5s clip: waves crashing on black sand beach"
+5. Press Enter and wait for the result
+6. Click **Download** to save the generated image/video
+
+---
 
 ## Stack
 
