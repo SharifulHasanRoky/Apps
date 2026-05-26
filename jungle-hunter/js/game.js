@@ -179,11 +179,24 @@
       this.cam.x = Math.max(0, Math.min(this.world.w - this.viewW, this.cam.x));
       this.cam.y = Math.max(0, Math.min(this.world.h - this.viewH, this.cam.y));
 
+      // Effects: ambient particles + player trails
+      if (window.Effects) {
+        window.Effects.spawnAmbient(dt, this.level.biome, this.cam.x, this.cam.y, this.viewW, this.viewH);
+        window.Effects.spawnPlayerTrail(dt, this.player, this.level.biome);
+        window.Effects.updateEnvParticles(dt);
+        window.Effects.updateShake(dt);
+        window.Effects.updateDamageFlash(dt);
+      }
+
       // Shoot
       const wantShoot = window.Input.shoot || window.Input.shootHeld;
       if (wantShoot && this.player.canShoot()) {
         this.bullets.push(this.player.fire());
         window.SFX.playGunshot();
+        if (window.Effects) {
+          window.Effects.triggerShake(4);
+          window.Effects.spawnMuzzleSmoke(this.player);
+        }
       } else if (wantShoot && this.player.ammo === 0 && this.player.shootCd <= 0) {
         window.SFX.playEmpty();
         this.player.shootCd = 0.2;
@@ -289,7 +302,13 @@
       if (this.player.hp <= 0) {
         this.setState('gameOver');
         window.SFX.playDamage();
-      } else if (this.timeLeft <= 0) {
+      } else if (this.player.hp < this._lastHp) {
+        // Player took damage - trigger flash
+        if (window.Effects) window.Effects.triggerDamageFlash();
+        this._lastHp = this.player.hp;
+      }
+      this._lastHp = this.player.hp;
+      if (this.timeLeft <= 0) {
         this.setState('gameOver');
         this.gameOverReason = 'Time ran out';
       } else if (this.level.objective === 'kill' && this.killed >= this.level.target) {
@@ -338,13 +357,15 @@
       ctx.clearRect(0, 0, this.viewW, this.viewH);
 
       if (this.state === 'menu') {
-        // draw subtle background scroll
         ctx.fillStyle = '#0a1f15';
         ctx.fillRect(0, 0, this.viewW, this.viewH);
         return;
       }
 
       if (!this.level) return;
+
+      // Apply screen shake
+      const shake = window.Effects ? window.Effects.getShakeOffset() : { x: 0, y: 0 };
 
       // Background by biome
       if (this.level.biome === 'forest') {
@@ -355,9 +376,9 @@
         window.Sprites.drawVillageBg(ctx, this.viewW, this.viewH, this.t, this.cam.x, this.cam.y);
       }
 
-      // World transform
+      // World transform with shake
       ctx.save();
-      ctx.translate(-this.cam.x, -this.cam.y);
+      ctx.translate(-this.cam.x + shake.x, -this.cam.y + shake.y);
 
       // Decorations sorted by y for depth
       const drawables = [];
@@ -374,12 +395,24 @@
       // Particles on top
       for (const p of this.particles) p.render(ctx);
 
-      // World border (subtle)
+      // Environmental particles (leaves, dust, fireflies, smoke)
+      if (window.Effects) {
+        window.Effects.renderEnvParticles(ctx, this.cam.x - shake.x, this.cam.y - shake.y);
+      }
+
+      // World border
       ctx.strokeStyle = 'rgba(244, 196, 48, 0.25)';
       ctx.lineWidth = 4;
       ctx.strokeRect(0, 0, this.world.w, this.world.h);
 
       ctx.restore();
+
+      // Post-processing overlays (screen-space)
+      if (window.Effects) {
+        window.Effects.drawFog(ctx, this.viewW, this.viewH, this.t, this.level.biome);
+        window.Effects.drawVignette(ctx, this.viewW, this.viewH);
+        window.Effects.drawDamageFlash(ctx, this.viewW, this.viewH);
+      }
 
       // Minimap
       this.drawMinimap(ctx);
